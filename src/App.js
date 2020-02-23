@@ -2,6 +2,8 @@ import React from 'react';
 import './App.css';
 import Person from './Person/Person'
 
+
+
 class App extends React.Component {
   constructor(props) {
     super(props)
@@ -10,9 +12,9 @@ class App extends React.Component {
     // props:用于组件通信进行传值
     this.state = {
       persons: [
-        { name: '米斯特吴', count: 50 },
-        { name: 'Henry', count: 5 },
-        { name: 'Hemiah', count: 15 },
+        { id: 1, name: '米斯特吴', count: 50 },
+        { id: 2, name: 'Henry', count: 5 },
+        { id: 3, name: 'Hemiah', count: 15 },
       ],
       otherState: 'anything',
       showPersons: false
@@ -31,13 +33,21 @@ class App extends React.Component {
     })
   }
 
-  nameChangedHandler = (event) => {
+  nameChangedHandler = (event, id) => {
+    const personIndex = this.state.persons.findIndex(p => {
+      return p.id === id
+    })
+
+    const person = { ...this.state.persons[personIndex] }
+
+    person.name = event.target.value
+
+    const persons = [...this.state.persons]
+
+    persons[personIndex] = person
+
     this.setState({
-      persons: [
-        { name: event.target.value, count: 50 },
-        { name: 'Henry', count: 50000 },
-        { name: 'Hemiah', count: 15 },
-      ],
+      persons: persons
     })
   }
 
@@ -46,10 +56,19 @@ class App extends React.Component {
     this.setState({ showPersons: !doesShow })
   }
 
+  deletePersonHandler = (personIndex) => {
+    const persons = this.state.persons
+    persons.splice(personIndex, 1)
+    this.setState({
+      persons: persons
+    })
+  }
+
   render() {
 
     const style = {
-      backgroundColor: 'white',
+      backgroundColor: 'green',
+      color: 'white',
       font: 'inherit',
       border: '1px soild blue',
       padding: '8px',
@@ -60,26 +79,35 @@ class App extends React.Component {
     if (this.state.showPersons) {
       persons = (
         <div>
-          <Person
-            changed={this.nameChangedHandler}
-            name={this.state.persons[0].name}
-            count={this.state.persons[0].count} />
-          <Person
-            myclick={this.switchNameHandler.bind(this, '米修missu')}
-            name={this.state.persons[1].name}
-            count={this.state.persons[1].count} />
-          <Person
-            name={this.state.persons[2].name}
-            count={this.state.persons[2].count} >非常感谢</Person>
+          {
+            this.state.persons.map((person, index) => {
+              return <Person
+                changed={(event) => this.nameChangedHandler(event, person.id)}
+                myclick={() => this.deletePersonHandler(index)}
+                key={index}
+                name={person.name}
+                count={person.count} />
+            })
+          }
         </div>
       )
+
+      style.backgroundColor = 'red'
+    }
+
+    const classes = []
+    if (this.state.persons.length <= 2) {
+      classes.push('red')
+    }
+
+    if (this.state.persons.length <= 1) {
+      classes.push('bold')
     }
 
     return (
       <div className="App" >
         <h1>Hello World</h1>
-        {/* <button onClick={()=>this.switchNameHandler("米修")}>更改状态值</button> */}
-        {/* <button style={style} onClick={this.switchNameHandler.bind(this, 'missu')}>更改状态值</button> */}
+        <p className={classes.join(' ')}>Hi,React App</p>
         <button style={style} onClick={this.togglePersonsHandler}>内容切换</button>
         {persons}
       </div>
